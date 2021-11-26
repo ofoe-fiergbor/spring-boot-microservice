@@ -4,6 +4,7 @@ import com.example.moviecatalogservice.models.CatalogItem;
 import com.example.moviecatalogservice.models.Movie;
 import com.example.moviecatalogservice.models.Rating;
 import com.example.moviecatalogservice.models.UserRating;
+import com.netflix.discovery.DiscoveryClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,17 +26,20 @@ public class MovieCatalogResource {
 
     @Autowired
     private RestTemplate restTemplate;
+
     @Autowired
-    private WebClient.Builder webClientBuilder;
+    private DiscoveryClient discoveryClient;
+//    @Autowired
+//    private WebClient.Builder webClientBuilder;
 
     @GetMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable String userId) {
 
         //get all rated movie ids
-        UserRating ratings = restTemplate.getForObject("http://localhost:8083/ratingsdata/users/"+ userId, UserRating.class);
+        UserRating ratings = restTemplate.getForObject("http://RATINGS-DATA-SERVICE/ratingsdata/users/"+ userId, UserRating.class);
         //for each movie id, call movie info service and get details
         return ratings.getUserRating().stream().map(rating -> {
-            Movie movie = restTemplate.getForObject("http://localhost:8082/movies/"+ rating.getMovieId(), Movie.class);
+            Movie movie = restTemplate.getForObject("http://MOVIE-INFO-SERVICE/movies/"+ rating.getMovieId(), Movie.class);
 //            Movie movie = webClientBuilder.build()
 //                    .get()
 //                    .uri("http://localhost:8082/movies/"+ rating.getMovieId())
